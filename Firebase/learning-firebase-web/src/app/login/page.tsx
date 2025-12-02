@@ -35,7 +35,7 @@ const LogIn = () => {
         }
 
         catch (error: any) {
-            console.log('Something wnet wrong while log in user user: ', error.message);
+            console.log('Something went wrong while log in user user: ', error.message);
         }
     }
 

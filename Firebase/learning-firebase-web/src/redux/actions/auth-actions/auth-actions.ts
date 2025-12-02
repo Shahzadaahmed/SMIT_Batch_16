@@ -22,9 +22,14 @@ const signUpUser = (userData: UserData) => {
       );
       console.log(createUser);
 
+      const saveUserData = {
+        ...userData,
+        uid : createUser?.user?.uid
+      }
+
       if (createUser) {
         // Note: Saving data in DB...!
-        const firebaseDocRef = await addDoc(collection(db, "Users"), userData);
+        const firebaseDocRef = await addDoc(collection(db, "Users"), saveUserData);
         console.log("Saved data in DB: ", firebaseDocRef);
       }
     } catch (error: any) {

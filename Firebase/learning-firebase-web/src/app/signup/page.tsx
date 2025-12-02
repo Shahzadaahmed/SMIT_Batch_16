@@ -32,7 +32,7 @@ const SignUp = () => {
     const user = {
       name: formStates.name,
       email: formStates.email,
-      password: formStates.password,
+      password: formStates.password
     };
     // console.log("User: ", user);
     dispatch(signUpUser(user)).finally(() => {
