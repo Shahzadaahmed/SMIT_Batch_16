@@ -29,9 +29,9 @@ const RootLayout = ({
   };
 
   // Mounted hook..!
-  // useEffect(() => {
-  //   fetchAuthUser();
-  // }, []);
+  useEffect(() => {
+    fetchAuthUser();
+  }, []);
 
   return (
     <html lang="en">

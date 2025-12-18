@@ -8,6 +8,8 @@ import { AppDispatch } from "@/redux/store";
 import { logInUser } from '@/redux/actions/auth-actions/auth-actions';
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { setCookie } from "cookies-next";
+import { LOGIN_USER } from "@/redux/reducers/auth-reducer/auth-reducer";
 
 const provider = new GoogleAuthProvider()
 
@@ -45,7 +47,27 @@ const LogIn = () => {
     const googleSignInHandler = async () => {
         try {
             const gooleRes = await signInWithPopup(auth, provider);
-            console.log(gooleRes);
+            const userDetails = gooleRes?.user;
+            console.log('Google user: ', userDetails);
+
+            const saveUser = {
+                email: userDetails?.email,
+                uid: userDetails?.uid,
+                name: userDetails?.displayName,
+                dp: userDetails?.photoURL
+            };
+
+            const googleToken = await userDetails?.getIdToken();
+            console.log('Google token: ' , googleToken);
+            if (googleToken) {
+                // Saving token...!
+                setCookie('token', googleToken);
+
+                // Saving auth user in redux...!
+                dispatch(LOGIN_USER(saveUser));
+
+                window.location.reload();
+            }
         }
 
         catch (error) {
