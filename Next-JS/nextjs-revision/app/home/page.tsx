@@ -48,8 +48,23 @@ const Home = () => {
   };
 
   // Delete Data...!
-  const handleDelete = (key: number) => {
+  const handleDelete = async (key: number) => {
     console.log("Li to delete: ", key);
+
+    try {
+      let res = await axios({
+        method: "DELETE",
+        url: `http://localhost:5050/todo/delete/${key}`,
+      });
+
+      const { status, data } = res;
+      if (status) {
+        alert("Item deleted");
+        handleGetTodoData();
+      }
+    } catch (error) {
+      console.log("Err while deleting data: ", error);
+    }
   };
 
   // Mounted hook...!

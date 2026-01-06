@@ -17,7 +17,7 @@ config({
 // Global variables...!
 const port = process.env.PORT;
 const app = express();
-let todoBucket = [];
+let todoBucket = []; // Database
 
 // Middlewares...!
 app.use(express.json());
@@ -120,7 +120,54 @@ app.get("/todo/fetch-all", (req, res) => {
 // Create 5th api: /todo/delete/:key route(Delete todo data from DB)...!
 app.delete("/todo/delete/:key", (req, res) => {
   const { key } = req.params;
-  console.log(`Todo iten key: ${key}`);
+  console.log(`Key: ${key}`);
+
+  try {
+    const fetchTodos = [...todoBucket];
+    fetchTodos.splice(key, 1);
+    todoBucket = fetchTodos;
+
+    return res.status(200).send({
+      status: true,
+      message: "Todo item deleted successfully",
+    });
+  } catch (error) {
+    console.log(`Err while deleting data: ${error}`);
+    return res?.status(500).send({
+      status: false,
+      message: "Server Err",
+    });
+  }
+});
+
+// Create 6th api: /todo/update route(Update todo data from DB)...!
+app.put("/todo/update", (req, res) => {
+  console.log(`Body: ${JSON.stringify(req.body)}`);
+  const { key, updatedValue } = req?.body;
+
+  try {
+    if (!key || !updatedValue) {
+      return res.status(400).send({
+        status: false,
+        message: "Key and updated are required!",
+      });
+    }
+
+    const fetchTodos = [...todoBucket];
+    fetchTodos.splice(key, 1, updatedValue);
+    todoBucket = fetchTodos;
+
+    return res.status(200).send({
+      status: true,
+      message: "Todo item updated successfully",
+    });
+  } catch (error) {
+    console.log(`Err while updating data: ${error}`);
+    return res?.status(500).send({
+      status: false,
+      message: "Server Err",
+    });
+  }
 });
 
 // Server running...!
