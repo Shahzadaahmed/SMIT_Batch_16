@@ -1,7 +1,7 @@
 // Note: Main server file...!
 
 // Importing libs...!
-import express, { json } from "express";
+import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import { config } from "dotenv";
@@ -106,6 +106,36 @@ app.post("/user/save", async (req, res) => {
       status: false,
       message: "Err from server side",
       serverErrMsg: error,
+    });
+  }
+});
+
+// Note: Fetch all users from DB...!
+app.get("/users/fetch/all", async (req, res) => {
+  try {
+    const usersCount = await UserModal.countDocuments();
+    console.log(`Counts: ${usersCount}`);
+
+    if (usersCount < 1) {
+      return res.status(400).send({
+        status: false,
+        message: "No user found",
+      });
+    }
+
+    // 200:
+    const fetchUsers = await UserModal.find();
+    return res.status(200).send({
+      status: true,
+      message: "Users fetched successfully",
+      data: fetchUsers,
+    });
+  } catch (error) {
+    console.log("Something went wrong while fetching users: ", error);
+
+    return res.status(500).send({
+      status: false,
+      message: "Something went wrong while fetching users",
     });
   }
 });
