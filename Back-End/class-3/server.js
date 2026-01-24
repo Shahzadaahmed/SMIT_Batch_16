@@ -5,7 +5,9 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import { config } from "dotenv";
-import mongoose from "mongoose";
+import conectMongoDB from "./src/database/db.js";
+
+import userRoutes from "./src/routes/user-routes/user-routes.js";
 
 // Environment variables config...!
 config({
@@ -13,14 +15,7 @@ config({
 });
 
 // Note: Database connection here...!
-mongoose
-  .connect(process.env.MONGO_DB_URL, { dbName: "TTS_16_DB" })
-  .then((res) => {
-    console.log("Mongo DB connected successfully");
-  })
-  .catch((err) => {
-    console.log(`Something went wrong while connecting DB: ${err}`);
-  });
+conectMongoDB();
 
 // Global variables...!
 const port = process.env.PORT;
@@ -31,13 +26,7 @@ app.use(express.json());
 app.use(morgan("dev"));
 app.use(cors());
 
-// Create 1st api: / route...!
-app.get("/", (req, res) => {
-  return res.status(200).send({
-    statusCode: 200,
-    message: "Welcome to Back End using Node JS",
-  });
-});
+app.use(userRoutes);
 
 // Server running...!
 app.listen(port, () => {
