@@ -1,13 +1,14 @@
 // All user related routes are defined herr...!
 
 import express from "express";
-import { welcomeToDB } from "../../controllers/user-controller/user-controller.js";
+import { welcomeToDB , createUser } from "../../controllers/user-controller/user-controller.js";
 
 const router = express.Router();
 
 // Note: / api route api defined here...!
 router.route('/').get(welcomeToDB);
 
-router.route('/users/fetch/all').get(welcomeToDB);
+// Note: / api route api to save user in DB...!
+router.route('/save/:adminId').post(createUser);
 
 export default router;

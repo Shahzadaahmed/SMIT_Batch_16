@@ -26,7 +26,7 @@ app.use(express.json());
 app.use(morgan("dev"));
 app.use(cors());
 
-app.use(userRoutes);
+app.use("/user", userRoutes);
 
 // Server running...!
 app.listen(port, () => {
