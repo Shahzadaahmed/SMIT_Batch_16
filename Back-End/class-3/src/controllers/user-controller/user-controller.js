@@ -1,5 +1,6 @@
 // All user related controller functions are defined here...!
 
+import jwt from "jsonwebtoken";
 import UserModal from "../../models/user-model/user-model.js";
 
 const welcomeToDB = (req, res) => {
@@ -50,4 +51,64 @@ const createUser = async (req, res) => {
   }
 };
 
-export { welcomeToDB , createUser };
+// Login user api controller...!
+const logInUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    console.log(email, password);
+
+    // 400
+    if (!email || !password) {
+      return res?.status(400).send({
+        status: false,
+        message: "Email and password required"
+      });
+    };
+
+    // 404:
+    const isUserExist = await UserModal.findOne({ email });
+    if (!isUserExist) {
+      return res?.status(404).send({
+        status: false,
+        message: "User not found"
+      });
+    }
+
+    // 401
+    if (password != isUserExist?.password) {
+      return res?.status(401).send({
+        status: false,
+        message: "Password is invalid"
+      });
+    }
+
+    // 200
+
+    // Generating token
+    const token = jwt.sign(
+      {
+        email: email,
+        uid: isUserExist?._id
+      },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: '1h' }
+    );
+
+    return res?.status(200).send({
+      status: true,
+      message: "Log In Success",
+      data: isUserExist,
+      token: token
+    });
+  }
+
+  catch (error) {
+    console.log('Server err in login api: ', error);
+    return res?.status(500).send({
+      status: false,
+      message: "Internal server error"
+    });
+  }
+}
+
+export { welcomeToDB, createUser, logInUser };
