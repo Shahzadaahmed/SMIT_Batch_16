@@ -87,12 +87,12 @@ const logInUser = async (req, res) => {
     // Generating token
     const token = jwt.sign(
       {
-        email: email,
-        uid: isUserExist?._id
+        userName: isUserExist?.userName,
+        uid: isUserExist?._id + new Date().getTime()
       },
       process.env.JWT_SECRET_KEY,
       { expiresIn: '1h' }
-    );
+    )
 
     return res?.status(200).send({
       status: true,
@@ -111,4 +111,36 @@ const logInUser = async (req, res) => {
   }
 }
 
-export { welcomeToDB, createUser, logInUser };
+// Feth all users api controller...!
+const fetchAllUsers = async (req, res) => {
+  try {
+    const counts = await UserModal.countDocuments();
+    console.log(`Counts: ${counts}`);
+
+    // 400
+    if (counts < 1) {
+      return res?.status(400).send({
+        status: false,
+        message: "No user found"
+      });
+    };
+
+    // 200
+    const users = await UserModal.find({});
+    return res?.status(200).send({
+      status: true,
+      message: 'Users fetched successfully',
+      data: users
+    })
+  }
+
+  catch (error) {
+    console.log(`Server Err: ${error}`);
+    return res?.status(500).send({
+      status: 500,
+      message: "Internal server error"
+    });
+  }
+}
+
+export { welcomeToDB, createUser, logInUser , fetchAllUsers };
