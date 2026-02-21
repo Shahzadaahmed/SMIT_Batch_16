@@ -4,6 +4,7 @@
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
+import fs from "fs";
 import { config } from "dotenv";
 import conectMongoDB from "./src/database/db.js";
 
@@ -20,6 +21,10 @@ conectMongoDB();
 // Global variables...!
 const port = process.env.PORT;
 const app = express();
+
+if (!fs.existsSync("uploads")) {
+  fs.mkdirSync("uploads");
+}
 
 // Middlewares...!
 app.use(express.json());
