@@ -9,6 +9,7 @@ import fs from "fs";
 import path, { join } from "path";
 import { config } from "dotenv";
 import conectMongoDB from "./src/database/db.js";
+import nodemailer from "nodemailer";
 
 // const customPath = path.join('uploads', 'images', "img123.png");
 // console.log(`Path: ${customPath}`);
@@ -51,33 +52,67 @@ app.use(morgan("dev"));
 app.use(cors());
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
-app.post("/api/upload/file", upload.single('image'), (req, res) => {
-  console.log(`File: ${JSON.stringify(req?.file)}`);
+app.post("/user/verify", (req, res) => {
   try {
-    // 400
-    if (!req?.file) {
-      return res?.status(400).send({
-        status: false,
-        message: "File is required or No file receoved"
-      });
+    const { userEmail } = req?.body;
+    console.log("Email: ", userEmail);
+
+    // Provider email data...!
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.SENDER_EMAIL,
+        pass: process.env.SENDER_PASSWORD
+      }
+    });
+
+    // Receiver data...!
+    const receiverDtails = {
+      from: process.env.SENDER_EMAIL,
+      to: userEmail,
+      subject: "Email Verification Step 2",
+      html: "Your OTP is 1234"
     };
 
-    // 200
-    return res?.status(200).send({
-      status: true,
-      message: 'File uploaded succesfully'
-    });
+    const sendEmail = transporter.sendMail(receiverDtails);
+    if (sendEmail) {
+      console.log(`Email send to ${userEmail} successfully!`);
+      return;
+    };
   }
 
   catch (error) {
-    // 500
-    console.log(`Something went wrong while saving image: ${error}`);
-    return res?.status(500).send({
-      status: false,
-      message: "Internal server error"
-    });
+    console.log(`Something went wrong while sending email to user: ${error}`);
   }
 });
+
+// app.post("/api/upload/file", upload.single('image'), (req, res) => {
+//   console.log(`File: ${JSON.stringify(req?.file)}`);
+//   try {
+//     // 400
+//     if (!req?.file) {
+//       return res?.status(400).send({
+//         status: false,
+//         message: "File is required or No file receoved"
+//       });
+//     };
+
+//     // 200
+//     return res?.status(200).send({
+//       status: true,
+//       message: 'File uploaded succesfully'
+//     });
+//   }
+
+//   catch (error) {
+//     // 500
+//     console.log(`Something went wrong while saving image: ${error}`);
+//     return res?.status(500).send({
+//       status: false,
+//       message: "Internal server error"
+//     });
+//   }
+// });
 
 // Server running...!
 app.listen(port, () => {
