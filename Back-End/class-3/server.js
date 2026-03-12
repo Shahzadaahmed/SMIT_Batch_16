@@ -52,40 +52,41 @@ app.use(morgan("dev"));
 app.use(cors());
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
-app.post("/user/verify", (req, res) => {
-  try {
-    const { userEmail } = req?.body;
-    console.log("Email: ", userEmail);
+// app.post("/user/verify", (req, res) => {
+//   try {
+//     const { userEmail } = req?.body;
+//     console.log("Email: ", userEmail);
 
-    // Provider email data...!
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.SENDER_EMAIL,
-        pass: process.env.SENDER_PASSWORD
-      }
-    });
+//     // Provider email data...!
+//     const transporter = nodemailer.createTransport({
+//       service: "gmail",
+//       auth: {
+//         user: process.env.SENDER_EMAIL,
+//         pass: process.env.SENDER_PASSWORD
+//       }
+//     });
 
-    // Receiver data...!
-    const receiverDtails = {
-      from: process.env.SENDER_EMAIL,
-      to: userEmail,
-      subject: "Email Verification Step 2",
-      html: "Your OTP is 1234"
-    };
+//     // Receiver data...!
+//     const receiverDtails = {
+//       from: process.env.SENDER_EMAIL,
+//       to: userEmail,
+//       subject: "Email Verification Step 2",
+//       html: "Your OTP is 1234"
+//     };
 
-    const sendEmail = transporter.sendMail(receiverDtails);
-    if (sendEmail) {
-      console.log(`Email send to ${userEmail} successfully!`);
-      return;
-    };
-  }
+//     const sendEmail = transporter.sendMail(receiverDtails);
+//     if (sendEmail) {
+//       console.log(`Email send to ${userEmail} successfully!`);
+//       return;
+//     };
+//   }
 
-  catch (error) {
-    console.log(`Something went wrong while sending email to user: ${error}`);
-  }
-});
+//   catch (error) {
+//     console.log(`Something went wrong while sending email to user: ${error}`);
+//   }
+// });
 
+// Multer wala kam
 // app.post("/api/upload/file", upload.single('image'), (req, res) => {
 //   console.log(`File: ${JSON.stringify(req?.file)}`);
 //   try {
