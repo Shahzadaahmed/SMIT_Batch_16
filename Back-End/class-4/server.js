@@ -24,19 +24,16 @@ app.use(morgan("dev"));
 app.use(cors());
 
 io.on("connect", (socket) => {
-  console.log(`A user connected ${socket.id}`);
+  console.log(`A user connected: ${socket.id}`);
 
-  socket.emit(
-    "welcome",
-    `Connection successfull and your socket id is ${socket.id}`,
-  );
+  socket.emit('welcome', `A user has been connected and it's id is ${socket.id}`);
 
-  socket.on("read", (data) => {
-    console.log("Message from the Front End: ", data);
+  socket.on("read-message", (data) => {
+    console.log(`Message received at server: ${data}`);
   });
 
-  socket.on("disconnect", () => {
-    console.log("User disconnected");
+  socket.on('disconnect', () => {
+    console.log(`User disconnected: ${socket.id}`);
   });
 });
 

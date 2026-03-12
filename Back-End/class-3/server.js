@@ -1,56 +1,111 @@
 // Note: Main server file...!
 
-// Importing libs...!
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
-import multer from "multer";
-import fs from "fs";
-import path, { join } from "path";
 import { config } from "dotenv";
 import conectMongoDB from "./src/database/db.js";
-import nodemailer from "nodemailer";
-
-// const customPath = path.join('uploads', 'images', "img123.png");
-// console.log(`Path: ${customPath}`);
+import http from "http";
+import { Server } from "socket.io";
 
 // Environment variables config...!
 config({
   path: "./.env",
 });
 
-// Note: Database connection here...!
-conectMongoDB();
-
-if (!fs.existsSync("uploads")) {
-  fs.mkdirSync("uploads");
-}
-
 // Global variables...!
 const port = process.env.PORT;
+console.log(process.env.PORT);
 const app = express();
-// Saving file on their respective destination with file name...!
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/')
-  },
-  filename: (req, file, cb) => {
-    console.log(`File: ${file}`);
-    const uniqueFileName = Date.now() + '-' + file.originalname;
-    cb(null, uniqueFileName);
-  }
-});
-// Multer config...!
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5mb
-});
+const server = http.createServer(app);
+const io = new Server(server, { cors: '*' });
+// Note: Database connection here...!
+conectMongoDB();
 
 // Middlewares...!
 app.use(express.json());
 app.use(morgan("dev"));
 app.use(cors());
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
+io.on("connection", (socket) => {
+  console.log(`User connected: ${socket.id}`);
+});
+
+// Server running...!
+server.listen(port, () => {
+  console.log(`Server is running on port: ${port}`);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Email wala kam nodemailer
+// Importing libs...!
+// import express from "express";
+// import morgan from "morgan";
+// import cors from "cors";
+// import multer from "multer";
+// import fs from "fs";
+// import path, { join } from "path";
+// import { config } from "dotenv";
+// import conectMongoDB from "./src/database/db.js";
+// import nodemailer from "nodemailer";
+
+// // const customPath = path.join('uploads', 'images', "img123.png");
+// // console.log(`Path: ${customPath}`);
+
+// // Environment variables config...!
+// config({
+//   path: "./.env",
+// });
+
+// // Note: Database connection here...!
+// conectMongoDB();
+
+// if (!fs.existsSync("uploads")) {
+//   fs.mkdirSync("uploads");
+// }
+
+// // Global variables...!
+// const port = process.env.PORT;
+// const app = express();
+// // Saving file on their respective destination with file name...!
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, 'uploads/')
+//   },
+//   filename: (req, file, cb) => {
+//     console.log(`File: ${file}`);
+//     const uniqueFileName = Date.now() + '-' + file.originalname;
+//     cb(null, uniqueFileName);
+//   }
+// });
+// // Multer config...!
+// const upload = multer({
+//   storage: storage,
+//   limits: { fileSize: 5 * 1024 * 1024 }, // 5mb
+// });
+
+// // Middlewares...!
+// app.use(express.json());
+// app.use(morgan("dev"));
+// app.use(cors());
+// app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // app.post("/user/verify", (req, res) => {
 //   try {
@@ -116,53 +171,14 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 // });
 
 // Server running...!
-app.listen(port, () => {
-  console.log(`Server is running on port: ${port}`);
-});
+// app.listen(port, () => {
+//   console.log(`Server is running on port: ${port}`);
+// });
 
 
+// Note: Main server file...!
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// // Note: Main server file...!
-
-// // Importing libs...!
+// Importing libs...!
 // import express from "express";
 // import morgan from "morgan";
 // import cors from "cors";

@@ -8,27 +8,23 @@ const socket = io("http://localhost:5050", { autoConnect: false });
 
 const App = () => {
   const handleSubmit = () => {
-    socket.emit("read", "Hello from Front End Next JS");
+    socket.emit('read-message', 'Hello from client Next JS');
   };
 
   useEffect(() => {
     socket.connect();
-
-    socket.on("connect", () => {
-      console.log("Connected", socket.id);
+    socket.on('connect', () => {
+      console.log('Connected: ', socket.id);
     });
 
-    // Targeting welcome...!
     socket.on("welcome", (data) => {
-      console.log("Message from the server: ", data);
+      console.log('Message received from server: ', data);
     });
 
-    // When unmount...!
     return () => {
-      socket.off("connect");
-      socket.off("disconnect");
+      socket.off('connect');
       socket.disconnect();
-    };
+    }
   }, []);
 
   return (
