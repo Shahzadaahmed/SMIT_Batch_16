@@ -8,7 +8,11 @@ const socket = io("http://localhost:5050", { autoConnect: false });
 
 const App = () => {
   const handleSubmit = () => {
-    socket.emit('read-message', 'Hello from client Next JS');
+    // socket.emit('read-message', 'Hello from client Next JS');
+    socket.emit("private-msg", {
+      to: "user_2",
+      message: "Hello testing 123"
+    });
   };
 
   useEffect(() => {
@@ -17,9 +21,11 @@ const App = () => {
       console.log('Connected: ', socket.id);
     });
 
-    socket.on("welcome", (data) => {
-      console.log('Message received from server: ', data);
-    });
+    // socket.on("welcome", (data) => {
+    //   console.log('Message received from server: ', data);
+    // });
+
+    socket.emit("register", "user_1");
 
     return () => {
       socket.off('connect');

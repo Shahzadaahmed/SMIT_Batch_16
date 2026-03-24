@@ -23,13 +23,25 @@ app.use(express.json());
 app.use(morgan("dev"));
 app.use(cors());
 
+const usersData = {};
+
 io.on("connect", (socket) => {
   console.log(`A user connected: ${socket.id}`);
 
-  socket.emit('welcome', `A user has been connected and it's id is ${socket.id}`);
+  // socket.emit('welcome', `A user has been connected and it's id is ${socket.id}`);
 
-  socket.on("read-message", (data) => {
-    console.log(`Message received at server: ${data}`);
+  // socket.on("read-message", (data) => {
+  //   console.log(`Message received at server: ${data}`);
+  // });
+
+  socket.on("register", (userId) => {
+    console.log(`User id: ${userId}`);
+    usersData[userId] = socket.id; // Saving users...!
+    console.log("Users: ", usersData);
+  });
+
+  socket.on('private-msg', ({ to, message }) => {
+    console.log(`To: ${to} - Message: ${message}`);
   });
 
   socket.on('disconnect', () => {
