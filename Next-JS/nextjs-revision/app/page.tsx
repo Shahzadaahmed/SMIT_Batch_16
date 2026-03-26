@@ -7,6 +7,7 @@ import { io } from "socket.io-client";
 const socket = io("http://localhost:5050", { autoConnect: false });
 
 const App = () => {
+
   const handleSubmit = () => {
     // socket.emit('read-message', 'Hello from client Next JS');
     socket.emit("private-msg", {
@@ -27,8 +28,13 @@ const App = () => {
 
     socket.emit("register", "user_1");
 
+    socket.on('private-msg', (msgData) => {
+      console.log('Message received FE: ', msgData);
+    });
+
     return () => {
       socket.off('connect');
+      socket.off('private-msg');
       socket.disconnect();
     }
   }, []);

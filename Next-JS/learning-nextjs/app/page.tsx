@@ -21,9 +21,14 @@ const App = () => {
     });
 
     socket.emit("register", "user_2");
+    
+    socket.on('private-msg', (msgData) => {
+      console.log('Message received FE: ', msgData);
+    });
 
     return () => {
       socket.off('connect');
+      socket.off('private-msg');
       socket.disconnect();
     }
   }, []);

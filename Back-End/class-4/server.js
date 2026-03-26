@@ -42,6 +42,17 @@ io.on("connect", (socket) => {
 
   socket.on('private-msg', ({ to, message }) => {
     console.log(`To: ${to} - Message: ${message}`);
+
+    const targetSocket = usersData[to];
+
+    if (targetSocket) {
+      io.to(targetSocket).emit("private-msg", {
+        message,
+        from: socket.id
+      });
+    }
+
+    else console.log('Target user not found!');
   });
 
   socket.on('disconnect', () => {
