@@ -13,9 +13,11 @@
   "type": "module",
   "dependencies": {
     "cors": "^2.8.5",
+    "dns": "^0.2.2",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "mongoose": "^9.1.2",
-    "morgan": "^1.10.1"
+    "morgan": "^1.10.1",
+    "node-cache": "^5.1.2"
   }
 }

@@ -25,16 +25,28 @@
 // });
 // console.log(modifyNames);
 
-const arr = ['ahmed', 'ali', 'inzamam', 'muhammad', 'zulqernain'];
-let nestedArrFound = false;
+// const arr = ['ahmed', 'ali', 'inzamam', 'muhammad', 'zulqernain'];
+// let nestedArrFound = false;
 
-for (let item of arr) {
-  // console.log(item);
-  if (Array.isArray(item)) {
-    nestedArrFound = true;
-    break
-  }
+// for (let item of arr) {
+//   // console.log(item);
+//   if (Array.isArray(item)) {
+//     nestedArrFound = true;
+//     break
+//   }
+// };
+
+// if (nestedArrFound) console.log('Nested array found');
+// else console.log('Nested array not found');
+
+
+
+// const nums = [14, 8, 91, 15, 102, 9];
+// console.log(nums);
+
+
+const inputEl = document.getElementById('text');
+
+const handleSpeak = () => {
+  speechSynthesis.speak(new SpeechSynthesisUtterance(inputEl.value));
 };
-
-if (nestedArrFound) console.log('Nested array found');
-else console.log('Nested array not found');

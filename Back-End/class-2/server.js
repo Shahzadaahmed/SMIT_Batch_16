@@ -6,6 +6,11 @@ import morgan from "morgan";
 import cors from "cors";
 import { config } from "dotenv";
 import mongoose from "mongoose";
+import * as dns from "dns"; // For resolving hostnames...!
+import nodeCache from "node-cache";
+
+dns.setDefaultResultOrder("ipv4first"); // For resolving hostnames to IPv4 addresses first...!
+dns.setServers(["1.1.1.1", "8.8.8.8"]); // For setting custom DNS servers...!
 
 // Environment variables config...!
 config({
@@ -55,6 +60,7 @@ const UserModal = mongoose.model("User", userSchema);
 // Global variables...!
 const port = process.env.PORT;
 const app = express();
+const cacheClient = new nodeCache();
 
 // Middlewares...!
 app.use(express.json());
@@ -222,6 +228,46 @@ app.put("/user/update", async (req, res) => {
     return res?.status(500).send({
       status: false,
       message: "Err while updating user",
+    });
+  }
+});
+
+// fetch user by uid...!
+app.get('/user/fetch/:uid', async (req, res) => {
+  try {
+    const { uid } = req.params;
+    const redisKey = uid;
+    console.log(`User Id: ${redisKey}`);
+
+    const cachedData = await cacheClient.get(redisKey);
+
+    if (cachedData) {
+      console.log('User fetched from Cache.');
+      return res?.status(200).send({
+        status: true,
+        message: "User fecthed succussfully",
+        data: JSON.parse(cachedData)
+      });
+    };
+
+    const fetchUser = await UserModal.findById(redisKey).lean();
+    await cacheClient.set(redisKey, JSON.stringify(fetchUser), 60);
+
+    if (fetchUser) {
+      console.log('User fetched from DB.');
+      return res?.status(200).send({
+        status: true,
+        message: "User fecthed succussfully",
+        data: fetchUser
+      });
+    };
+  }
+
+  catch (error) {
+    console.log("Err while fetching user data by id: ", error);
+    return res?.status(500).send({
+      status: false,
+      message: "Err while fetching user data by id",
     });
   }
 });

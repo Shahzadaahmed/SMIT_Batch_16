@@ -5,34 +5,24 @@ import morgan from "morgan";
 import cors from "cors";
 import { config } from "dotenv";
 import conectMongoDB from "./src/database/db.js";
-import http from "http";
-import { Server } from "socket.io";
 
 // Environment variables config...!
 config({
   path: "./.env",
 });
+conectMongoDB();
 
 // Global variables...!
 const port = process.env.PORT;
-console.log(process.env.PORT);
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server, { cors: '*' });
-// Note: Database connection here...!
-conectMongoDB();
 
 // Middlewares...!
 app.use(express.json());
 app.use(morgan("dev"));
 app.use(cors());
 
-io.on("connection", (socket) => {
-  console.log(`User connected: ${socket.id}`);
-});
-
 // Server running...!
-server.listen(port, () => {
+app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
 });
 
