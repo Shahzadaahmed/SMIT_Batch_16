@@ -8,6 +8,7 @@ import { config } from "dotenv";
 import mongoose from "mongoose";
 import * as dns from "dns"; // For resolving hostnames...!
 import nodeCache from "node-cache";
+import compression from "compression";
 
 dns.setDefaultResultOrder("ipv4first"); // For resolving hostnames to IPv4 addresses first...!
 dns.setServers(["1.1.1.1", "8.8.8.8"]); // For setting custom DNS servers...!
@@ -66,6 +67,7 @@ const cacheClient = new nodeCache();
 app.use(express.json());
 app.use(morgan("dev"));
 app.use(cors());
+app.use(compression());
 
 // Create 1st api: / route...!
 app.get("/", (req, res) => {
@@ -121,6 +123,9 @@ app.get("/users/fetch/all", async (req, res) => {
   const { role } = req.query;
   console.log("Role: ", role);
 
+  const page = 1;
+  const limit = 10;
+
   try {
     const usersCount = await UserModal.countDocuments();
     console.log(`Counts: ${usersCount}`);
@@ -134,7 +139,10 @@ app.get("/users/fetch/all", async (req, res) => {
 
     // 200 (Query filter)
     if (role) {
-      const fetchUsers = await UserModal.find({ role });
+      const fetchUsers = await UserModal
+        .find({ role })
+        .skip((page - 1) * limit)
+        .limit(limit);
       return res.status(200).send({
         status: true,
         message: "Users fetched successfully",
@@ -250,7 +258,10 @@ app.get('/user/fetch/:uid', async (req, res) => {
       });
     };
 
-    const fetchUser = await UserModal.findById(redisKey).lean();
+    const fetchUser = await UserModal
+    .findById(redisKey)
+    .select('userName')
+    .lean();
     await cacheClient.set(redisKey, JSON.stringify(fetchUser), 60);
 
     if (fetchUser) {
@@ -272,7 +283,11 @@ app.get('/user/fetch/:uid', async (req, res) => {
   }
 });
 
-// Server running...!
+app.get('/view/portfolio', (req, res) => {
+  // return res.status(200).send('<h1> Welcome to Node JS! </h1>');
+  return res.redirect('https://ali-portfolio-nine.vercel.app/');
+});
+
 app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
 });
