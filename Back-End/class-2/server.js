@@ -9,6 +9,7 @@ import mongoose from "mongoose";
 import * as dns from "dns"; // For resolving hostnames...!
 import nodeCache from "node-cache";
 import compression from "compression";
+import rateLimit from "express-rate-limit";
 
 dns.setDefaultResultOrder("ipv4first"); // For resolving hostnames to IPv4 addresses first...!
 dns.setServers(["1.1.1.1", "8.8.8.8"]); // For setting custom DNS servers...!
@@ -35,13 +36,15 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       required: true,
-      unique: true,
+      // unique: true,
+      // index: true // General indexing
     },
     password: String,
     role: {
       type: String,
       required: true,
       enum: ["admin", "customer"],
+      // index: true
     },
     address: {
       type: String,
@@ -56,18 +59,29 @@ const userSchema = new mongoose.Schema(
     collection: "users-list",
   }
 );
+
+// Compound indexing on email...!
+userSchema.index({ email: 1 }, { unique: true });
+
 const UserModal = mongoose.model("User", userSchema);
 
 // Global variables...!
 const port = process.env.PORT;
 const app = express();
 const cacheClient = new nodeCache();
+const limit = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 mins
+  max: 10,
+  standardHeaders: true,
+  skip: (req) => req?.method === 'OPTIONS'
+});
 
 // Middlewares...!
 app.use(express.json());
 app.use(morgan("dev"));
 app.use(cors());
 app.use(compression());
+app.use(limit);
 
 // Create 1st api: / route...!
 app.get("/", (req, res) => {
@@ -259,9 +273,9 @@ app.get('/user/fetch/:uid', async (req, res) => {
     };
 
     const fetchUser = await UserModal
-    .findById(redisKey)
-    .select('userName')
-    .lean();
+      .findById(redisKey)
+      .select('userName')
+      .lean();
     await cacheClient.set(redisKey, JSON.stringify(fetchUser), 60);
 
     if (fetchUser) {
@@ -286,6 +300,31 @@ app.get('/user/fetch/:uid', async (req, res) => {
 app.get('/view/portfolio', (req, res) => {
   // return res.status(200).send('<h1> Welcome to Node JS! </h1>');
   return res.redirect('https://ali-portfolio-nine.vercel.app/');
+});
+
+app.get('/user/fetchByEmail/:email', async (req, res) => {
+  try {
+    const { email } = req.params;
+
+    const fetchUser = await UserModal.find({ email: email }).explain();
+    console.log("Check indexing: ", fetchUser);
+
+    if (fetchUser) {
+      return res?.status(200).send({
+        status: true,
+        message: "User fetched succussfully by email",
+        data: fetchUser
+      });
+    };
+  }
+
+  catch (error) {
+    console.log("Err while fetching user data by email: ", error);
+    return res?.status(500).send({
+      status: false,
+      message: "Err while fetching user data by email",
+    });
+  }
 });
 
 app.listen(port, () => {
