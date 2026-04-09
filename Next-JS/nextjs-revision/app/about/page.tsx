@@ -2,39 +2,56 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from '../src/components/header/header';
-
-// interface UserProps {
-//     "id": 1,
-//     "name": "Leanne Graham",
-//     "username": "Bret",
-//     "email": "Sincere@april.biz",
-//     "address": {
-//       "street": "Kulas Light",
-//       "suite": "Apt. 556",
-//       "city": "Gwenborough",
-//       "zipcode": "92998-3874",
-//       "geo": {
-//         "lat": "-37.3159",
-//         "lng": "81.1496"
-//       }
-//     },
-//     "phone": "1-770-736-8031 x56442",
-//     "website": "hildegard.org",
-//     "company": {
-//       "name": "Romaguera-Crona",
-//       "catchPhrase": "Multi-layered client-server neural-net",
-//       "bs": "harness real-time e-markets"
-//     }
-//   }
+import axios from 'axios';
 
 const About = () => {
-    const [users, setUsers] = useState<{}[]>([]);
+    const [searchInput, setSearchInput] = useState("");
+    const [users, setUsers] = useState([]);
+
+    const handleSearch = async (value: any) => {
+        console.log(value);
+        setSearchInput(value)
+
+        if (searchInput == '') {
+            setUsers([]);
+            return;
+        };
+
+        const apiUrl = `http://localhost:5000/seach-user?keyword=${searchInput}`;
+        const response = await axios.get(apiUrl);
+        console.log(response);
+        response && setUsers(response?.data?.data);
+    }
+
+    useEffect(() => {
+        if (searchInput == '' || searchInput.trim().length < 1) {
+            setUsers([]);
+        };
+    }, [searchInput]);
 
     return (
         <div>
             <Header screenName='About' />
+            <h2> Search User... </h2>
+
+            <input
+                type="text"
+                placeholder='Search User...'
+                value={searchInput}
+                onChange={(e: any) => handleSearch(e.target.value)}
+            />
+
+            <ul>
+                {
+                    users && users?.map((item: any, index: number) => {
+                        return (
+                            <li key={index}> {item?.userName} </li>
+                        );
+                    })
+                }
+            </ul>
         </div>
     );
 };

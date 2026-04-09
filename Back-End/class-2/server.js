@@ -62,26 +62,27 @@ const userSchema = new mongoose.Schema(
 
 // Compound indexing on email...!
 userSchema.index({ email: 1 }, { unique: true });
+userSchema.index({ userName: 1 });
 
 const UserModal = mongoose.model("User", userSchema);
 
 // Global variables...!
-const port = process.env.PORT;
+const port = 5000;
 const app = express();
 const cacheClient = new nodeCache();
-const limit = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 mins
-  max: 10,
-  standardHeaders: true,
-  skip: (req) => req?.method === 'OPTIONS'
-});
+// const limit = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 mins
+//   max: 10,
+//   standardHeaders: true,
+//   skip: (req) => req?.method === 'OPTIONS'
+// });
 
 // Middlewares...!
 app.use(express.json());
 app.use(morgan("dev"));
 app.use(cors());
 app.use(compression());
-app.use(limit);
+// app.use(limit);
 
 // Create 1st api: / route...!
 app.get("/", (req, res) => {
@@ -324,6 +325,27 @@ app.get('/user/fetchByEmail/:email', async (req, res) => {
       status: false,
       message: "Err while fetching user data by email",
     });
+  }
+});
+
+// Search user api...!
+app.get("/seach-user", async (req, res) => {
+  try {
+    const { keyword } = req?.query;
+
+    const users = await UserModal.find({
+      userName: { $regex: keyword, $options: 'i' }
+    });
+
+    return res?.status(200).send({
+      status: true,
+      message : "user found successfully",
+      data: users
+    });
+  }
+
+  catch (error) {
+    console.log('Err while searching user name: ', error);
   }
 });
 
