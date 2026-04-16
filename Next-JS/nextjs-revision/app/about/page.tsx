@@ -34,9 +34,7 @@ const About = () => {
     const apiUrl = "http://localhost:5050/check-out/session";
 
     try {
-      await loadStripe(
-        "pk_test_51T5wFfFpwbFPjMDnZici1c6kfqwYIabxBOogSmCXhO5Efc3Wf06FZhLpfkVqTvoiie9XIIXDoeQUdlZPSwQIdwg7007iKv9uOL",
-      );
+      await loadStripe("apni key lao");
       const response = await axios({
         method: "POST",
         url: apiUrl,
