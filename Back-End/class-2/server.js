@@ -12,7 +12,7 @@ import compression from "compression";
 import rateLimit from "express-rate-limit";
 import Stripe from "stripe";
 
-const stripe = new Stripe("apni key lao", { apiVersion: "2023-10-16" });
+const stripe = new Stripe("", { apiVersion: "2023-10-16" });
 
 dns.setDefaultResultOrder("ipv4first"); // For resolving hostnames to IPv4 addresses first...!
 dns.setServers(["1.1.1.1", "8.8.8.8"]); // For setting custom DNS servers...!

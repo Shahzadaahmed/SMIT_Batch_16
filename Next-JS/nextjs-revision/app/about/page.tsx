@@ -34,7 +34,7 @@ const About = () => {
     const apiUrl = "http://localhost:5050/check-out/session";
 
     try {
-      await loadStripe("apni key lao");
+      await loadStripe("");
       const response = await axios({
         method: "POST",
         url: apiUrl,
