@@ -10,6 +10,12 @@ import * as dns from "dns"; // For resolving hostnames...!
 import nodeCache from "node-cache";
 import compression from "compression";
 import rateLimit from "express-rate-limit";
+import Stripe from "stripe";
+
+const stripe = new Stripe(
+  "sk_test_51T5wFfFpwbFPjMDntBGi09hfibppv5LoQgA3n0O9K9WS3xUmYvj5fIhGesnZxEWwb30zErve3WwISZEvUCPAqZlr00AEFc1zJ2",
+  { apiVersion: "2023-10-16" },
+);
 
 dns.setDefaultResultOrder("ipv4first"); // For resolving hostnames to IPv4 addresses first...!
 dns.setServers(["1.1.1.1", "8.8.8.8"]); // For setting custom DNS servers...!
@@ -57,7 +63,7 @@ const userSchema = new mongoose.Schema(
   },
   {
     collection: "users-list",
-  }
+  },
 );
 
 // Compound indexing on email...!
@@ -73,7 +79,7 @@ const limit = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 mins
   max: 10,
   standardHeaders: true,
-  skip: (req) => req?.method === 'OPTIONS'
+  skip: (req) => req?.method === "OPTIONS",
 });
 
 // Middlewares...!
@@ -153,8 +159,7 @@ app.get("/users/fetch/all", async (req, res) => {
 
     // 200 (Query filter)
     if (role) {
-      const fetchUsers = await UserModal
-        .find({ role })
+      const fetchUsers = await UserModal.find({ role })
         .skip((page - 1) * limit)
         .limit(limit);
       return res.status(200).send({
@@ -234,7 +239,7 @@ app.put("/user/update", async (req, res) => {
         userName: updatedName,
         address: updatedAdd,
       },
-      { new: true }
+      { new: true },
     );
 
     if (updateData) {
@@ -255,7 +260,7 @@ app.put("/user/update", async (req, res) => {
 });
 
 // fetch user by uid...!
-app.get('/user/fetch/:uid', async (req, res) => {
+app.get("/user/fetch/:uid", async (req, res) => {
   try {
     const { uid } = req.params;
     const redisKey = uid;
@@ -264,31 +269,28 @@ app.get('/user/fetch/:uid', async (req, res) => {
     const cachedData = await cacheClient.get(redisKey);
 
     if (cachedData) {
-      console.log('User fetched from Cache.');
+      console.log("User fetched from Cache.");
       return res?.status(200).send({
         status: true,
         message: "User fecthed succussfully",
-        data: JSON.parse(cachedData)
+        data: JSON.parse(cachedData),
       });
-    };
+    }
 
-    const fetchUser = await UserModal
-      .findById(redisKey)
-      .select('userName')
+    const fetchUser = await UserModal.findById(redisKey)
+      .select("userName")
       .lean();
     await cacheClient.set(redisKey, JSON.stringify(fetchUser), 60);
 
     if (fetchUser) {
-      console.log('User fetched from DB.');
+      console.log("User fetched from DB.");
       return res?.status(200).send({
         status: true,
         message: "User fecthed succussfully",
-        data: fetchUser
+        data: fetchUser,
       });
-    };
-  }
-
-  catch (error) {
+    }
+  } catch (error) {
     console.log("Err while fetching user data by id: ", error);
     return res?.status(500).send({
       status: false,
@@ -297,12 +299,12 @@ app.get('/user/fetch/:uid', async (req, res) => {
   }
 });
 
-app.get('/view/portfolio', (req, res) => {
+app.get("/view/portfolio", (req, res) => {
   // return res.status(200).send('<h1> Welcome to Node JS! </h1>');
-  return res.redirect('https://ali-portfolio-nine.vercel.app/');
+  return res.redirect("https://ali-portfolio-nine.vercel.app/");
 });
 
-app.get('/user/fetchByEmail/:email', async (req, res) => {
+app.get("/user/fetchByEmail/:email", async (req, res) => {
   try {
     const { email } = req.params;
 
@@ -313,16 +315,53 @@ app.get('/user/fetchByEmail/:email', async (req, res) => {
       return res?.status(200).send({
         status: true,
         message: "User fetched succussfully by email",
-        data: fetchUser
+        data: fetchUser,
       });
-    };
-  }
-
-  catch (error) {
+    }
+  } catch (error) {
     console.log("Err while fetching user data by email: ", error);
     return res?.status(500).send({
       status: false,
       message: "Err while fetching user data by email",
+    });
+  }
+});
+
+app.post("/check-out/session", async (req, res) => {
+  const { items } = req.body;
+
+  const lineItems = items?.map((item) => {
+    return {
+      price_data: {
+        currency: "usd",
+        product_data: {
+          name: item?.productName,
+          images: [item?.image],
+        },
+        unit_amount: Math.round(item?.price * 100),
+      },
+      quantity: item?.quantity,
+    };
+  });
+
+  const paymentSession = await stripe.checkout.sessions.create({
+    payment_method_types: ["card"],
+    mode: "payment",
+    line_items: lineItems,
+    success_url: "https://themasterjackets-web.vercel.app/success",
+    cancel_url: "https://themasterjackets-web.vercel.app/cancel",
+  });
+
+  console.log("Stripe session created: ", paymentSession);
+
+  if (paymentSession) {
+    return res?.status(200).send({
+      status: true,
+      message: "Payment successfull",
+      data: {
+        sessionId: paymentSession.id,
+        checkoutUrl: paymentSession.url,
+      },
     });
   }
 });

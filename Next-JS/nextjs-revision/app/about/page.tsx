@@ -1,42 +1,67 @@
 // About Screen...!
 
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import Header from '../src/components/header/header';
+import React from "react";
+import { loadStripe } from "@stripe/stripe-js";
+import axios from "axios";
 
-// interface UserProps {
-//     "id": 1,
-//     "name": "Leanne Graham",
-//     "username": "Bret",
-//     "email": "Sincere@april.biz",
-//     "address": {
-//       "street": "Kulas Light",
-//       "suite": "Apt. 556",
-//       "city": "Gwenborough",
-//       "zipcode": "92998-3874",
-//       "geo": {
-//         "lat": "-37.3159",
-//         "lng": "81.1496"
-//       }
-//     },
-//     "phone": "1-770-736-8031 x56442",
-//     "website": "hildegard.org",
-//     "company": {
-//       "name": "Romaguera-Crona",
-//       "catchPhrase": "Multi-layered client-server neural-net",
-//       "bs": "harness real-time e-markets"
-//     }
-//   }
+const productData = [
+  {
+    id: 1,
+    productName: "Watch",
+    des: "Best watch",
+    price: 150,
+    quantity: 2,
+    stock: "available",
+    image:
+      "https://www.angeljackets.com/product_images/w/608/womens-black-leather-jacket-cafe-racer__25390_thumb.webp",
+  },
+  {
+    id: 2,
+    productName: "Shirt",
+    des: "Best Shirt",
+    price: 250,
+    quantity: 3,
+    stock: "available",
+    image:
+      "https://www.angeljackets.com/product_images/g/475/hooded-leather-jacket-brown__02409_thumb.webp",
+  },
+];
 
 const About = () => {
-    const [users, setUsers] = useState<{}[]>([]);
+  const handleCheckout = async () => {
+    const apiUrl = "http://localhost:5050/check-out/session";
 
-    return (
-        <div>
-            <Header screenName='About' />
-        </div>
-    );
+    try {
+      await loadStripe(
+        "pk_test_51T5wFfFpwbFPjMDnZici1c6kfqwYIabxBOogSmCXhO5Efc3Wf06FZhLpfkVqTvoiie9XIIXDoeQUdlZPSwQIdwg7007iKv9uOL",
+      );
+      const response = await axios({
+        method: "POST",
+        url: apiUrl,
+        data: {
+          items: productData,
+        },
+      });
+      console.log("Payment res FE: ", response);
+
+      const { status, data } = response;
+
+      if (status == 200) {
+        window.location.href = data?.data?.checkoutUrl;
+      }
+    } catch (error) {
+      console.log("Err in stripe checkout from FE: ", error);
+    }
+  };
+
+  return (
+    <div>
+      <h1> Stripe integration with Next JS and Node JS </h1>
+      <button onClick={handleCheckout}> Checkout </button>
+    </div>
+  );
 };
 
 export default About;
