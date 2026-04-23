@@ -20,6 +20,7 @@
     "express-rate-limit": "^8.3.2",
     "mongoose": "^9.1.2",
     "morgan": "^1.10.1",
-    "node-cache": "^5.1.2"
+    "node-cache": "^5.1.2",
+    "stripe": "^22.0.1"
   }
 }
