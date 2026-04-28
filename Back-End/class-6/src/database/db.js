@@ -13,7 +13,7 @@ const pool = new Pool({
 pool
     .connect()
     .then((res) => {
-        console.log('Postgres DB connected successfully!: ', res);
+        console.log('Postgres DB connected successfully!');
         res.release();
     })
     .catch((err) => {
