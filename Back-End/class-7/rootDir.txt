@@ -1,0 +1,2 @@
+npx knex migrate:latest
+npx knex migrate:make create_users

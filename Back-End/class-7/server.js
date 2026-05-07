@@ -1,12 +1,4 @@
 // Note: Main server file...!
-
-// Importing libs...!
-// import express from "express";
-// import morgan from "morgan";
-// import cors from "cors";
-// import dotenv from "dotenv";
-// import db from "./src/database/db.js";
-
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
@@ -30,6 +22,27 @@ app.get("/", (req, res) => {
     status: 200,
     message: "Node JS with Knex JS and Postgres DB",
   });
+});
+
+// Create a user...!
+app.post("/user/create", async (req, res) => {
+  try {
+    const { username, email } = req?.body;
+    const [user] = await db('users').insert({ username, email }).returning('*');
+
+    return res?.status(200).send({
+      status: true,
+      message: "User created successfully"
+    });
+  }
+
+  catch (error) {
+    console.log('Something went wrong while creating user: ', error);
+    return res?.status(500).send({
+      status: false,
+      message: "Something went wrong while creating user"
+    });
+  }
 });
 
 // Fetch all users...!
